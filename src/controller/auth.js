@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { emailService, userService } from '../service/index.js';
 import UserSchema from '../model/user.js';
+import { jwtService } from '../service/jwt.js';
 
 const registration = async (req, res) => {
   try {
@@ -50,7 +51,32 @@ const activateUser = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await userService.findByEmail({ email });
+
+    if (!user || user.password !== password) {
+      return res.status(401).send();
+    }
+
+    const userDto = userService.dto(user);
+    const accessToken = jwtService.sign(userDto);
+
+    res.send({
+      accessToken,
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    res.status(500).send();
+  }
+};
+
 export const authController = {
   registration,
   activateUser,
+  login,
 };

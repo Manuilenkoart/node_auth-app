@@ -5,5 +5,6 @@ const authRouter = new express.Router();
 
 authRouter.post('/registration', authController.registration);
 authRouter.get('/activate/:activationToken', authController.activateUser);
+authRouter.post('/login', authController.login);
 
 export default authRouter;
