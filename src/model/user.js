@@ -11,6 +11,10 @@ const UserSchema = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  activationToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 export default UserSchema;
