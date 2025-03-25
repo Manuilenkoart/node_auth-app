@@ -5,14 +5,20 @@ import { jwtService } from '../service/jwt.js';
 
 const registration = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !name) {
       return res.status(400).send();
     }
 
     const activationToken = uuidv4();
-    const user = await userService.create({ email, password, activationToken });
+
+    const user = await userService.create({
+      email,
+      password,
+      name,
+      activationToken,
+    });
 
     if (!user) {
       return res.status(400).send();
