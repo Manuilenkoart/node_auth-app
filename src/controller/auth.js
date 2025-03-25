@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { emailService, userService } from '../service/index.js';
 import UserSchema from '../model/user.js';
 import { jwtService } from '../service/jwt.js';
+import bcrypt from 'bcrypt';
 
 const registration = async (req, res) => {
   try {
@@ -12,10 +13,11 @@ const registration = async (req, res) => {
     }
 
     const activationToken = uuidv4();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await userService.create({
       email,
-      password,
+      password: hashedPassword,
       name,
       activationToken,
     });
@@ -63,7 +65,9 @@ const login = async (req, res) => {
 
     const user = await userService.findByEmail({ email });
 
-    if (!user || user.password !== password) {
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!user || !isPasswordCorrect) {
       return res.status(401).send();
     }
 
