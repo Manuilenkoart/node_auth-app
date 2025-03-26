@@ -105,34 +105,48 @@ const logout = async (req, res) => {
 };
 
 const refresh = async (req, res) => {
-  const { refreshToken } = req.cookies;
+  try {
+    const { refreshToken } = req.cookies;
 
-  const user = jwtService.verifyRefresh(refreshToken);
-  const token = await tokensService.getByToken(refreshToken);
+    const user = jwtService.verifyRefresh(refreshToken);
+    const token = await tokensService.getByToken(refreshToken);
 
-  if (!user || !token) {
-    return res.status(401).send();
+    if (!user || !token) {
+      return res.status(401).send();
+    }
+
+    await generateTokens(res, user);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    res.status(500).send();
   }
-
-  await generateTokens(res, user);
 };
 
 const generateTokens = async (res, user) => {
-  const userDto = userService.dto(user);
+  try {
+    const userDto = userService.dto(user);
 
-  const accessToken = jwtService.signAccess(userDto);
-  const refreshToken = jwtService.signRefresh(userDto);
+    const accessToken = jwtService.signAccess(userDto);
+    const refreshToken = jwtService.signRefresh(userDto);
 
-  await tokensService.save({ userId: userDto.id, newToken: refreshToken });
+    await tokensService.save({ userId: userDto.id, newToken: refreshToken });
 
-  res.cookie('refreshToken', refreshToken, {
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    httpOnly: true,
-  });
+    res.cookie('refreshToken', refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      httpOnly: true,
+    });
 
-  res.send({
-    accessToken,
-  });
+    res.send({
+      accessToken,
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    res.status(500).send();
+  }
 };
 
 export const authController = {
