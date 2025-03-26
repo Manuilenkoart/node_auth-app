@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../db/connection.js';
 
-const UserSchema = sequelize.define('User', {
+const UserSchema = sequelize.define('user', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,

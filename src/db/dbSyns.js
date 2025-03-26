@@ -7,6 +7,7 @@
  */
 import 'dotenv/config';
 // import UserSchema from '../model/user.js'; // require import Shema for update
+// import TokensSchema from '../model/tokens.js';
 import { sequelize } from './connection.js';
 
 sequelize.sync({ force: true });

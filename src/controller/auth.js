@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { emailService, userService } from '../service/index.js';
+import { emailService, tokensService, userService } from '../service/index.js';
 import UserSchema from '../model/user.js';
 import { jwtService } from '../service/jwt.js';
 import bcrypt from 'bcrypt';
@@ -65,18 +65,17 @@ const login = async (req, res) => {
 
     const user = await userService.findByEmail({ email });
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
-    if (!user || !isPasswordCorrect) {
+    if (!user) {
       return res.status(401).send();
     }
 
-    const userDto = userService.dto(user);
-    const accessToken = jwtService.sign(userDto);
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-    res.send({
-      accessToken,
-    });
+    if (!isPasswordCorrect) {
+      return res.status(401).send();
+    }
+
+    await generateTokens(res, user);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -85,8 +84,40 @@ const login = async (req, res) => {
   }
 };
 
+const refresh = async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  const user = jwtService.verifyRefresh(refreshToken);
+  const token = await tokensService.getByToken(refreshToken);
+
+  if (!user || !token) {
+    return res.status(401).send();
+  }
+
+  await generateTokens(res, user);
+};
+
+const generateTokens = async (res, user) => {
+  const userDto = userService.dto(user);
+
+  const accessToken = jwtService.signAccess(userDto);
+  const refreshToken = jwtService.signRefresh(userDto);
+
+  await tokensService.save({ userId: userDto.id, newToken: refreshToken });
+
+  res.cookie('refreshToken', refreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    httpOnly: true,
+  });
+
+  res.send({
+    accessToken,
+  });
+};
+
 export const authController = {
   registration,
   activateUser,
   login,
+  refresh,
 };

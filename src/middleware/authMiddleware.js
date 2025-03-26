@@ -9,7 +9,7 @@ export const authMiddleware = (req, res, next) => {
     return res.status(401).send();
   }
 
-  const isJwtValid = jwtService.verify(token);
+  const isJwtValid = jwtService.verifyAccess(token);
 
   if (!isJwtValid) {
     return res.status(401).send();

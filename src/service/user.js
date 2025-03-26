@@ -20,7 +20,17 @@ const findById = ({ id }) => {
 };
 
 const update = ({ data, id }) => {
-  return UserSchema.update(data, { where: { id } });
+  return UserSchema.update(data, { where: { id } })
+    .then(([rowsUpdate]) => {
+      if (rowsUpdate === 0) {
+        throw new Error('Update failed');
+      }
+
+      return { success: true };
+    })
+    .catch((error) => {
+      return { success: false, error: error.message };
+    });
 };
 
 export const userService = {

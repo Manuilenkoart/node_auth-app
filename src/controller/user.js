@@ -9,8 +9,8 @@ const update = async (req, res) => {
       id: userId,
     });
 
-    if (!updatedUser) {
-      return res.status(400).send();
+    if (!updatedUser.success) {
+      return res.status(400).send(updatedUser.error);
     }
 
     const user = await userService.findById({ id: userId });
