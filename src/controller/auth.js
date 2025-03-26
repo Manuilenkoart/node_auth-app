@@ -84,6 +84,26 @@ const login = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+    const { refreshToken = '' } = req.cookie;
+
+    const user = jwtService.verifyRefresh(refreshToken);
+
+    if (user) {
+      await tokensService.deleteToken(user.id);
+    }
+
+    res.clearCookie('refreshToken');
+    res.status(204).send();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    res.status(500).send();
+  }
+};
+
 const refresh = async (req, res) => {
   const { refreshToken } = req.cookies;
 
@@ -119,5 +139,6 @@ export const authController = {
   registration,
   activateUser,
   login,
+  logout,
   refresh,
 };
