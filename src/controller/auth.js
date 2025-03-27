@@ -3,14 +3,14 @@ import { emailService, tokensService, userService } from '../service/index.js';
 import UserSchema from '../model/user.js';
 import { jwtService } from '../service/jwt.js';
 import bcrypt from 'bcrypt';
+import { userValidation } from '../validation/index.js';
 
 const registration = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
-
-    if (!email || !password || !name) {
-      return res.status(400).send();
-    }
+    const { email, password, name } =
+      await userValidation.registerSchema.validate(req.body, {
+        abortEarly: false,
+      });
 
     const activationToken = uuidv4();
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -30,6 +30,9 @@ const registration = async (req, res) => {
 
     res.status(200).send();
   } catch (error) {
+    if (error?.errors) {
+      return res.status(400).send({ error: error.errors });
+    }
     // eslint-disable-next-line no-console
     console.error(error);
 
@@ -61,12 +64,24 @@ const activateUser = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = await userValidation.loginSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+      },
+    );
 
     const user = await userService.findByEmail({ email });
 
     if (!user) {
       return res.status(401).send();
+    }
+
+    if (user.activationToken) {
+      return res.status(403).send({
+        error:
+          'Account is not activated. Check your email for the activation link.',
+      });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
@@ -77,6 +92,9 @@ const login = async (req, res) => {
 
     await generateTokens(res, user);
   } catch (error) {
+    if (error?.errors) {
+      return res.status(401).send({ error: error.errors });
+    }
     // eslint-disable-next-line no-console
     console.error(error);
 
