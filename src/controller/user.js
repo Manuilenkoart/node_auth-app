@@ -20,10 +20,18 @@ const update = async (req, res) => {
       dbUser,
     );
 
+    if (password && typeof password !== 'string') {
+      return password;
+    }
+
     const validatedEmail = await userValidation.newEmailSchema.validate(
       req.body,
     );
     const email = await userService.updateEmail(res, validatedEmail, dbUser);
+
+    if (email && typeof email !== 'string') {
+      return email;
+    }
 
     const validatedName = await userValidation.newNameSchema.validate(req.body);
     const name = await userService.updateName(validatedName);
