@@ -37,10 +37,14 @@ const update = ({ data, id }) => {
     });
 };
 
-const updatePassword = async (res, data, dbUser) => {
-  if (data?.password && data?.newPassword && data?.confirmPassword) {
+const updatePassword = async (
+  res,
+  { password, newPassword, confirmPassword },
+  dbUser,
+) => {
+  if (password && newPassword && confirmPassword) {
     const isPasswordCorrect = await bcryptService.isPasswordCorrect(
-      data.password,
+      password,
       dbUser.password,
     );
 
@@ -48,9 +52,7 @@ const updatePassword = async (res, data, dbUser) => {
       return res.status(401).send({ error: 'Incorrect current password' });
     }
 
-    const password = await bcryptService.hashPassword(data.newPassword);
-
-    return password;
+    return bcryptService.hashPassword(newPassword);
   }
 
   return null;

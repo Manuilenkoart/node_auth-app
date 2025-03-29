@@ -18,9 +18,12 @@ const update = async (req, res) => {
       return res.status(404).send({ error: 'User not found' });
     }
 
+    const validatedPassword = await userValidation.newPasswordSchema.validate(
+      req.body,
+    );
     const password = await userService.updatePassword(
       res,
-      validatedUserData,
+      validatedPassword,
       dbUser,
     );
 
@@ -40,6 +43,10 @@ const update = async (req, res) => {
       },
       {},
     );
+
+    if (!Object.keys(data).length) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
 
     const updatedUser = await userService.update({ data, id: userId });
 

@@ -13,13 +13,16 @@ const loginSchema = registerSchema.pick(['email', 'password']);
 
 const updateUserShema = yup.object({
   name: registerSchema.fields.name.optional(),
-  password: yup.string().when('newPassword', {
+});
+
+const newPasswordSchema = yup.object({
+  newPassword: registerSchema.fields.password.optional(),
+  password: registerSchema.fields.password.when('newPassword', {
     is: (newPassword) => !!newPassword,
-    then: (schema) => schema.min(6).required('Current password is required'),
+    then: (schema) => schema.required(),
     otherwise: (schema) => schema.notRequired(),
   }),
-  newPassword: registerSchema.fields.password.optional(),
-  confirmPassword: yup.string().when('newPassword', {
+  confirmPassword: registerSchema.fields.password.when('newPassword', {
     is: (newPassword) => !!newPassword,
     then: (schema) =>
       schema
@@ -27,7 +30,7 @@ const updateUserShema = yup.object({
           [yup.ref('newPassword'), null],
           'New password and confirm password do not match',
         )
-        .required('Confirm password is required'),
+        .required(),
     otherwise: (schema) => schema.notRequired(),
   }),
 });
@@ -51,4 +54,5 @@ export const userValidation = {
   loginSchema,
   updateUserShema,
   newEmailSchema,
+  newPasswordSchema,
 };
