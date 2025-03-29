@@ -84,12 +84,8 @@ const updateEmail = async (res, { email, newEmail, password }, dbUser) => {
   return null;
 };
 
-const updateName = (data) => {
-  if (data?.name) {
-    return data.name;
-  }
-
-  return null;
+const updateName = ({ name }) => {
+  return name || null;
 };
 
 export const userService = {

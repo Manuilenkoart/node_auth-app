@@ -89,7 +89,7 @@ const login = async (req, res) => {
       });
     }
 
-    const isPasswordCorrect = await bcryptService.compare(
+    const isPasswordCorrect = await bcryptService.isPasswordCorrect(
       password,
       user.password,
     );
@@ -175,10 +175,13 @@ const generateTokens = async (res, user) => {
   }
 };
 
+const passwordReset = () => {};
+
 export const authController = {
   registration,
   activateUser,
   login,
   logout,
   refresh,
+  passwordReset,
 };

@@ -5,13 +5,6 @@ const update = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const validatedUserData = await userValidation.updateUserShema.validate(
-      req.body,
-      {
-        abortEarly: false,
-      },
-    );
-
     const dbUser = await userService.findById({ id: userId });
 
     if (!dbUser) {
@@ -31,7 +24,9 @@ const update = async (req, res) => {
       req.body,
     );
     const email = await userService.updateEmail(res, validatedEmail, dbUser);
-    const name = userService.updateName(validatedUserData);
+
+    const validatedName = await userValidation.newNameSchema.validate(req.body);
+    const name = userService.updateName(validatedName);
 
     const data = Object.entries({ password, email, name }).reduce(
       (acc, [key, value]) => {

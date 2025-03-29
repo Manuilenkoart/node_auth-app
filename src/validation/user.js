@@ -11,9 +11,7 @@ const registerSchema = yup.object({
 
 const loginSchema = registerSchema.pick(['email', 'password']);
 
-const updateUserShema = yup.object({
-  name: registerSchema.fields.name.optional(),
-});
+const newNameSchema = registerSchema.pick(['name']);
 
 const newPasswordSchema = yup.object({
   newPassword: registerSchema.fields.password.optional(),
@@ -52,7 +50,7 @@ const newEmailSchema = yup.object({
 export const userValidation = {
   registerSchema,
   loginSchema,
-  updateUserShema,
+  newNameSchema,
   newEmailSchema,
   newPasswordSchema,
 };
