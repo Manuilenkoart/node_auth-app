@@ -23,7 +23,11 @@ const update = async (req, res) => {
       validatedUserData,
       dbUser,
     );
-    const email = await userService.updateEmail(res, validatedUserData, dbUser);
+
+    const validatedEmail = await userValidation.newEmailSchema.validate(
+      req.body,
+    );
+    const email = await userService.updateEmail(res, validatedEmail, dbUser);
     const name = userService.updateName(validatedUserData);
 
     const data = Object.entries({ password, email, name }).reduce(

@@ -56,10 +56,10 @@ const updatePassword = async (res, data, dbUser) => {
   return null;
 };
 
-const updateEmail = async (res, data, dbUser) => {
-  if (data?.email && data?.newEmail && data?.password) {
+const updateEmail = async (res, { email, newEmail, password }, dbUser) => {
+  if (email && newEmail && password) {
     const isPasswordCorrect = await bcryptService.isPasswordCorrect(
-      data.password,
+      password,
       dbUser.password,
     );
 
@@ -67,16 +67,16 @@ const updateEmail = async (res, data, dbUser) => {
       return res.status(401).send({ error: 'Incorrect current password' });
     }
 
-    if (dbUser.email !== data.email) {
+    if (dbUser.email !== email) {
       return res.status(401).send({ error: 'Incorrect current email' });
     }
 
     await emailService.sendChangeEmail({
-      email: data.email,
-      newEmail: data.newEmail,
+      email,
+      newEmail: newEmail,
     });
 
-    return data.newEmail;
+    return newEmail;
   }
 
   return null;
