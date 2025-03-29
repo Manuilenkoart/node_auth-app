@@ -30,6 +30,16 @@ const updateUserShema = yup.object({
         .required('Confirm password is required'),
     otherwise: (schema) => schema.notRequired(),
   }),
+  newEmail: registerSchema.fields.email.optional(),
+  email: yup
+    .string()
+    .email('Invalid email format')
+    .when('newEmail', {
+      is: (newEmail) => !!newEmail,
+      then: (schema) =>
+        schema.email('Invalid email format').required('Email is required'),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 });
 
 export const userValidation = {

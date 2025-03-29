@@ -1,4 +1,6 @@
 import UserSchema from '../model/user.js';
+import { bcryptService } from './bcrypt.js';
+import { emailService } from './emails/sender.js';
 
 const dto = ({ id, email, name }) => ({ id, email, name });
 
@@ -29,8 +31,63 @@ const update = ({ data, id }) => {
       return { success: true };
     })
     .catch((error) => {
+      // console.log('error', error);
+
       return { success: false, error: error.message };
     });
+};
+
+const updatePassword = async (res, data, dbUser) => {
+  if (data?.password && data?.newPassword && data?.confirmPassword) {
+    const isPasswordCorrect = await bcryptService.isPasswordCorrect(
+      data.password,
+      dbUser.password,
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(401).send({ error: 'Incorrect current password' });
+    }
+
+    const password = await bcryptService.hashPassword(data.newPassword);
+
+    return password;
+  }
+
+  return null;
+};
+
+const updateEmail = async (res, data, dbUser) => {
+  if (data?.email && data?.newEmail && data?.password) {
+    const isPasswordCorrect = await bcryptService.isPasswordCorrect(
+      data.password,
+      dbUser.password,
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(401).send({ error: 'Incorrect current password' });
+    }
+
+    if (dbUser.email !== data.email) {
+      return res.status(401).send({ error: 'Incorrect current email' });
+    }
+
+    await emailService.sendChangeEmail({
+      email: data.email,
+      newEmail: data.newEmail,
+    });
+
+    return data.newEmail;
+  }
+
+  return null;
+};
+
+const updateName = (data) => {
+  if (data?.name) {
+    return data.name;
+  }
+
+  return null;
 };
 
 export const userService = {
@@ -39,4 +96,7 @@ export const userService = {
   findByEmail,
   findById,
   update,
+  updatePassword,
+  updateEmail,
+  updateName,
 };

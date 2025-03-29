@@ -1,38 +1,43 @@
 import { userService } from '../service/index.js';
 import { userValidation } from '../validation/index.js';
-import bcrypt from 'bcrypt';
 
 const update = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const data = await userValidation.updateUserShema.validate(req.body, {
-      abortEarly: false,
-    });
+    const validatedUserData = await userValidation.updateUserShema.validate(
+      req.body,
+      {
+        abortEarly: false,
+      },
+    );
 
-    if (data?.password) {
-      const dbUser = await userService.findById({ id: userId });
+    const dbUser = await userService.findById({ id: userId });
 
-      const isPasswordCorrect = await bcrypt.compare(
-        data.password,
-        dbUser.password,
-      );
-
-      if (!isPasswordCorrect) {
-        return res.status(401).send({ error: 'Incorrect current password' });
-      }
-
-      const hashedPassword = await bcrypt.hash(data.confirmPassword, 10);
-
-      data['password'] = hashedPassword;
-      delete data['newPassword'];
-      delete data['confirmPassword'];
+    if (!dbUser) {
+      return res.status(404).send({ error: 'User not found' });
     }
 
-    const updatedUser = await userService.update({
-      data,
-      id: userId,
-    });
+    const password = await userService.updatePassword(
+      res,
+      validatedUserData,
+      dbUser,
+    );
+    const email = await userService.updateEmail(res, validatedUserData, dbUser);
+    const name = userService.updateName(validatedUserData);
+
+    const data = Object.entries({ password, email, name }).reduce(
+      (acc, [key, value]) => {
+        if (value) {
+          acc[key] = value;
+        }
+
+        return acc;
+      },
+      {},
+    );
+
+    const updatedUser = await userService.update({ data, id: userId });
 
     if (!updatedUser.success) {
       return res.status(400).send(updatedUser.error);

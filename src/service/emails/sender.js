@@ -22,4 +22,15 @@ const sendActivation = async ({ email, activationToken }) => {
   return sendEmail({ to: email, subject: 'Activate account', html });
 };
 
-export const emailService = { sendActivation };
+const sendChangeEmail = async ({ email, newEmail }) => {
+  const html = `
+  <h1>Email is changed from ${email} to ${newEmail}</h1>
+`;
+
+  return sendEmail({ to: email, subject: 'Activate account', html });
+};
+
+export const emailService = {
+  sendActivation,
+  sendChangeEmail,
+};
