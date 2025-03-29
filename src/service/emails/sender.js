@@ -27,7 +27,7 @@ const sendChangeEmail = async ({ email, newEmail }) => {
   <h1>Email is changed from ${email} to ${newEmail}</h1>
 `;
 
-  return sendEmail({ to: email, subject: 'Activate account', html });
+  return sendEmail({ to: email, subject: 'Email changed', html });
 };
 
 export const emailService = {

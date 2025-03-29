@@ -10,6 +10,6 @@ const TokensSchema = sequelize.define('tokens', {
 });
 
 TokensSchema.belongsTo(UserSchema);
-UserSchema.hasOne(TokensSchema);
+UserSchema.hasMany(TokensSchema);
 
 export default TokensSchema;

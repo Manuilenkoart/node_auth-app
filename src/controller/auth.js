@@ -56,7 +56,7 @@ const activateUser = async (req, res) => {
     }
 
     user.activationToken = null;
-    user.save(); // Save the updated user to the database
+    await user.save(); // Save the updated user to the database
 
     res.send(userService.dto(user));
   } catch (error) {
@@ -112,7 +112,7 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    const { refreshToken = '' } = req.cookie;
+    const { refreshToken = '' } = req.cookies;
 
     const user = jwtService.verifyRefresh(refreshToken);
 
